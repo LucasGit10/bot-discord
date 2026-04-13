@@ -14,5 +14,5 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
           -X POST \
-          -d '{"content": "🚀 Novo deploy feito no bot!"}' \
+          -d '{"content": "🚀 Novo commit enviado! Deploy em andamento no Render..."}' \
           ${{ secrets.DISCORD_WEBHOOK }}
