@@ -3,9 +3,19 @@ const chalk = require("chalk");
 const boxen = require("boxen");
 const ora = require("ora");
 const { execSync } = require("child_process");
+const http = require("http"); // Adicionado para o Render
 const { Client, GatewayIntentBits, ActivityType } = require("discord.js");
 const noticiasCommand = require("./commands/news");
 const chartCommand = require("./commands/chart");
+
+// Servidor básico para o Render não dar erro de port bind
+const PORT = process.env.PORT || 3000;
+http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('Bot is running!');
+}).listen(PORT, () => {
+  console.log(`[Render] Servidor de health-check rodando na porta ${PORT}`);
+});
 
 const client = new Client({
   intents: [
