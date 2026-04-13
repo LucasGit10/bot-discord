@@ -1,4 +1,5 @@
 const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ComponentType } = require("discord.js");
+const chalk = require("chalk");
 const { pegarNoticias } = require("../services/gnews");
 const { resumirNoticias } = require("../services/ai");
 const { salvarSentimento } = require("../services/storage");
@@ -8,12 +9,12 @@ async function processarNoticias(context, topico) {
     const isInteraction = context.isChatInputCommand?.() || context.isStringSelectMenu?.();
     const user = isInteraction ? context.user : context.author;
 
-    console.log(chalk.blue(`[GNews] Buscando notícias sobre: ${topico}`));
-    const start = Date.now();
-    const res = await fetch(
-        `https://gnews.io/api/v4/search?q=${topico}&lang=pt&max=5&token=${process.env.GNEWS_KEY}`
-    );
-    console.log(chalk.gray(`[GNews] Resposta da API recebida em ${Date.now() - start}ms`));
+    const noticias = await pegarNoticias(topico);
+
+    if (noticias.length === 0) {
+      const resp = `❌ Nenhuma notícia encontrada sobre "${topico}".`;
+      return isInteraction ? (context.deferred ? context.editReply(resp) : context.reply(resp)) : context.channel.send(resp);
+    }
 
     const embedNoticias = new EmbedBuilder()
       .setTitle(`📰 Notícias: ${topico.toUpperCase()}`)
