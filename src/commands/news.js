@@ -5,11 +5,13 @@ const { resumirNoticias } = require("../services/ai");
 const { salvarSentimento } = require("../services/storage");
 
 async function processarNoticias(context, topico) {
+  console.log(`[News] Iniciando processarNoticias para: ${topico}`);
   try {
     const isInteraction = context.isChatInputCommand?.() || context.isStringSelectMenu?.();
     const user = isInteraction ? context.user : context.author;
 
     const noticias = await pegarNoticias(topico);
+    console.log(`[News] Notícias recebidas: ${noticias.length}`);
 
     if (noticias.length === 0) {
       const resp = `❌ Nenhuma notícia encontrada sobre "${topico}".`;
@@ -80,29 +82,32 @@ async function processarNoticias(context, topico) {
 
 module.exports = {
   async execute(context) {
+    console.log(`[Execute] Comando iniciado por: ${context.user?.tag || context.author?.tag}`);
     try {
       const isInteraction = context.isChatInputCommand?.();
       const isSelect = context.isStringSelectMenu?.();
       
-      let topico = "";
-
       if (isInteraction) {
+        console.log("[Execute-Slash] Chamando deferReply...");
         await context.deferReply();
-        topico = context.options.getString('topico');
+        console.log("[Execute-Slash] DeferReply OK.");
+        
+        const topico = context.options.getString('topico');
         if (topico) {
-            console.log(chalk.cyan(`[Comando] Iniciando busca para tópico: ${topico}`));
+            console.log(`[Execute-Slash] Tópico encontrado: ${topico}. Enviando editReply...`);
             await context.editReply(`🔎 Buscando notícias sobre **${topico}**...`);
             return processarNoticias(context, topico);
         }
       } else if (isSelect) {
-        topico = context.values[0];
-        console.log(chalk.cyan(`[Menu] Tópico selecionado: ${topico}`));
+        const topico = context.values[0];
+        console.log(`[Execute-Menu] Tópico selecionado: ${topico}. Atualizando mensagem...`);
         await context.update({ content: `✅ Selecionado: **${topico}**. Analisando...`, components: [] });
         return processarNoticias(context, topico);
       } else {
         const args = context.content.split(" ");
-        topico = args[1];
+        const topico = args[1];
         if (topico) {
+          console.log(`[Execute-Legado] Tópico: ${topico}`);
           context.reply(`🔎 Buscando notícias sobre **${topico}**...`);
           return processarNoticias(context, topico);
         }
