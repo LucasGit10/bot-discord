@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Política de Privacidade - News AI Bot</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent: #10b981;
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at top left, #064e3b, #0f172a);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 90%;
+            margin: 40px auto;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            padding: 40px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            color: var(--accent);
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            text-align: center;
+            letter-spacing: -1px;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            color: var(--accent);
+            margin-top: 30px;
+        }
+
+        p {
+            margin-bottom: 20px;
+            color: var(--text);
+            opacity: 0.9;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li::before {
+            content: "•";
+            color: var(--accent);
+            font-weight: bold;
+            display: inline-block; 
+            width: 1em;
+            margin-left: -1em;
+        }
+
+        li {
+            padding-left: 1em;
+            margin-bottom: 15px;
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--muted);
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 40px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Política de Privacidade</h1>
+        <p>A sua privacidade é uma prioridade. Aqui explicamos com total transparência como o <strong>News AI Bot</strong> lida com as informações.</p>
+        
+        <hr>
+
+        <h2>1. Dados Coletados</h2>
+        <ul>
+            <li><strong>Identificadores de Usuário:</strong> Coletamos o seu Discord User ID apenas para associar o seu histórico de buscas às pontuações de sentimento no comando de gráfico.</li>
+            <li><strong>Conteúdo de Mensagens:</strong> Processamos apenas as palavras-chave enviadas após os comandos (ex: o tópico da notícia). Não lemos mensagens privadas ou outros canais.</li>
+        </ul>
+
+        <h2>2. Uso das APIs de Terceiros</h2>
+        <p>Para funcionar, o bot envia o tópico da busca para a <strong>GNews API</strong> e os textos das notícias para a <strong>Groq API (Llama 3.3)</strong>. Nenhum dado pessoal identificável é enviado para essas APIs.</p>
+
+        <h2>3. Armazenamento</h2>
+        <p>Os dados de sentimento são armazenados localmente no servidor do bot para gerar os gráficos de tendência. Esses dados não são vendidos ou compartilhados com terceiros.</p>
+
+        <h2>4. Exclusão de Dados</h2>
+        <p>Como não possuímos um sistema de contas permanente, seus dados de histórico podem ser limpos periodicamente conforme a manutenção do servidor.</p>
+
+        <div class="footer">
+            &copy; 2026 News AI Bot - Privacidade em Primeiro Lugar.
+        </div>
+    </div>
+</body>
+</html>

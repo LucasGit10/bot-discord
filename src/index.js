@@ -3,18 +3,37 @@ const chalk = require("chalk");
 const boxen = require("boxen");
 const ora = require("ora");
 const { execSync } = require("child_process");
-const http = require("http"); // Adicionado para o Render
+const http = require("http");
+const fs = require("fs");
+const path = require("path");
 const { Client, GatewayIntentBits, ActivityType } = require("discord.js");
 const noticiasCommand = require("./commands/news");
 const chartCommand = require("./commands/chart");
 
-// Servidor básico para o Render não dar erro de port bind
 const PORT = process.env.PORT || 3000;
 http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('Bot is running!');
+  const url = req.url;
+
+  if (url === '/terms') {
+    const filePath = path.join(__dirname, '../public/terms.html');
+    fs.readFile(filePath, (err, data) => {
+      if (err) { res.writeHead(404); res.end("Erro: Arquivo não encontrado."); return; }
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(data);
+    });
+  } else if (url === '/privacy') {
+    const filePath = path.join(__dirname, '../public/privacy.html');
+    fs.readFile(filePath, (err, data) => {
+      if (err) { res.writeHead(404); res.end("Erro: Arquivo não encontrado."); return; }
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(data);
+    });
+  } else {
+    res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('Bot de Notícias Elite está online! Use /noticias ou /grafico no Discord.');
+  }
 }).listen(PORT, () => {
-  console.log(`[Render] Servidor de health-check rodando na porta ${PORT}`);
+  console.log(`[Render] Servidor institucional rodando na porta ${PORT}`);
 });
 
 const client = new Client({
