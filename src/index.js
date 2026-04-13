@@ -109,18 +109,14 @@ const runHealthChecks = async () => {
 (async () => {
   showBanner();
   
-  const ok = await runHealthChecks();
-  
-  if (ok) {
+  try {
     const loginSpinner = ora("Conectando ao Discord...").start();
-    try {
-      await client.login(process.env.DISCORD_TOKEN);
-      loginSpinner.stop();
-    } catch (err) {
-      loginSpinner.fail(chalk.red("Erro ao conectar ao Discord. Verifique o seu TOKEN."));
-      console.error(err);
-    }
-  } else {
+    await client.login(process.env.DISCORD_TOKEN);
+    loginSpinner.succeed(chalk.green("Bot online e pronto!"));
+
+    runHealthChecks();
+  } catch (error) {
+    console.error(chalk.red("Erro crítico na inicialização:"), error);
     process.exit(1);
   }
 })();
