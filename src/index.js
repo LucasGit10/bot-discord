@@ -2,11 +2,11 @@ require("dotenv").config();
 const chalk = require("chalk");
 const boxen = require("boxen");
 const ora = require("ora");
-const { execSync } = require("child_process");
+const { exec } = require("child_process");
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
-const { Client, GatewayIntentBits, ActivityType } = require("discord.js");
+const { Client, GatewayIntentBits, ActivityType, Events } = require("discord.js");
 const noticiasCommand = require("./commands/news");
 const chartCommand = require("./commands/chart");
 
@@ -44,7 +44,7 @@ const client = new Client({
   ]
 });
 
-client.once("ready", () => {
+client.once(Events.ClientReady, () => {
   console.log(boxen(
     chalk.green.bold(`✅ Bot Conectado!\n`) +
     chalk.white(`Tag: ${client.user.tag}\n`) +
@@ -92,18 +92,17 @@ const showBanner = () => {
   console.log(banner);
 };
 
-const runHealthChecks = async () => {
+const runHealthChecks = () => {
   const spinner = ora("Rodando testes de integridade (Health Checks)...").start();
   
-  try {
-    execSync("npm test", { stdio: 'ignore' });
-    spinner.succeed(chalk.green("Testes concluídos com sucesso! Sistema está saudável."));
-    return true;
-  } catch (error) {
-    spinner.fail(chalk.red("Os testes falharam! Verifique os módulos antes de iniciar o bot."));
-    console.log(chalk.gray("\nPara ver detalhes do erro, execute: ") + chalk.white("npm test\n"));
-    return false;
-  }
+  exec("npm test", (error) => {
+    if (error) {
+      spinner.fail(chalk.red("Os testes falharam! Verifique os módulos."));
+      console.log(chalk.gray("\nPara ver detalhes do erro, execute: ") + chalk.white("npm test\n"));
+    } else {
+      spinner.succeed(chalk.green("Testes concluídos com sucesso! Sistema saudável."));
+    }
+  });
 };
 
 (async () => {
