@@ -7,7 +7,6 @@ module.exports = {
     let topico = "";
 
     if (isInteraction) {
-      await context.deferReply();
       topico = context.options.getString('topico');
     } else {
       const args = context.content.split(" ");

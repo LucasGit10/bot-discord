@@ -88,10 +88,6 @@ module.exports = {
       const isSelect = context.isStringSelectMenu?.();
       
       if (isInteraction) {
-        console.log("[Execute-Slash] Chamando deferReply...");
-        await context.deferReply();
-        console.log("[Execute-Slash] DeferReply OK.");
-        
         const topico = context.options.getString('topico');
         if (topico) {
             console.log(`[Execute-Slash] Tópico encontrado: ${topico}. Enviando editReply...`);

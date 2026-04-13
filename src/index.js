@@ -71,6 +71,15 @@ client.on("messageCreate", async (msg) => {
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isChatInputCommand() && !interaction.isStringSelectMenu()) return;
 
+  // Resposta imediata para evitar o erro 10062 no Render
+  if (interaction.isChatInputCommand() && !interaction.deferred && !interaction.replied) {
+    try {
+      await interaction.deferReply();
+    } catch (e) {
+      console.error("[Index] Erro ao dar deferReply:", e);
+    }
+  }
+
   if (interaction.commandName === "noticias" || interaction.customId === "select_topico") {
     console.log(chalk.gray(`[Slash] /noticias ou interação recebida de ${interaction.user.tag}`));
     noticiasCommand.execute(interaction);
@@ -112,8 +121,9 @@ const runHealthChecks = () => {
     const loginSpinner = ora("Conectando ao Discord...").start();
     await client.login(process.env.DISCORD_TOKEN);
     loginSpinner.succeed(chalk.green("Bot online e pronto!"));
-
-    runHealthChecks();
+    
+    // Testes desativados no boot de produção para máxima velocidade
+    // runHealthChecks(); 
   } catch (error) {
     console.error(chalk.red("Erro crítico na inicialização:"), error);
     process.exit(1);
