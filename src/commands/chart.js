@@ -7,6 +7,7 @@ module.exports = {
     let topico = "";
 
     if (isInteraction) {
+      await context.deferReply();
       topico = context.options.getString('topico');
     } else {
       const args = context.content.split(" ");
@@ -15,14 +16,14 @@ module.exports = {
 
     if (!topico) {
       const msg = "❌ Por favor, informe o tópico (ex: `/grafico tecnologia` ou `!grafico tecnologia`).";
-      return isInteraction ? context.reply(msg) : context.reply(msg);
+      return isInteraction ? context.editReply(msg) : context.reply(msg);
     }
 
     const historico = buscarHistorico(topico);
 
     if (historico.length < 2) {
       const msg = `⚠️ Dados insuficientes para o tópico **${topico}**. Busque mais notícias primeiro para gerar uma tendência!`;
-      return isInteraction ? context.reply(msg) : context.reply(msg);
+      return isInteraction ? context.editReply(msg) : context.reply(msg);
     }
 
     const ultimosDados = historico.slice(-10);
@@ -82,7 +83,7 @@ module.exports = {
       .setFooter({ text: "Dados processados via Groq AI & QuickChart" });
 
     if (isInteraction) {
-      await context.reply({ embeds: [embed] });
+      await context.editReply({ embeds: [embed] });
     } else {
       await context.reply({ embeds: [embed] });
     }

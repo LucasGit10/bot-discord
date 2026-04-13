@@ -85,9 +85,11 @@ module.exports = {
     let topico = "";
 
     if (isInteraction) {
+      await context.deferReply();
       topico = context.options.getString('topico');
       if (topico) {
-          await context.reply(`🔎 Buscando notícias sobre **${topico}**...`);
+          // Usamos editReply pois já demos deferReply
+          await context.editReply(`🔎 Buscando notícias sobre **${topico}**...`);
           return processarNoticias(context, topico);
       }
     } else if (isSelect) {
@@ -118,7 +120,8 @@ module.exports = {
     const row = new ActionRowBuilder().addComponents(select);
 
     if (isInteraction) {
-        await context.reply({ content: '🧐 Qual assunto você gostaria de ler hoje?', components: [row] });
+        // Já demos deferReply lá em cima, então usamos editReply
+        await context.editReply({ content: '🧐 Qual assunto você gostaria de ler hoje?', components: [row] });
     } else {
         const response = await context.reply({ content: '🧐 Qual assunto você gostaria de ler hoje?', components: [row] });
         const collector = response.createMessageComponentCollector({ componentType: ComponentType.StringSelect, time: 30_000 });
