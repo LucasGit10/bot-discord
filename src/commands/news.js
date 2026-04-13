@@ -8,12 +8,12 @@ async function processarNoticias(context, topico) {
     const isInteraction = context.isChatInputCommand?.() || context.isStringSelectMenu?.();
     const user = isInteraction ? context.user : context.author;
 
-    const noticias = await pegarNoticias(topico);
-
-    if (noticias.length === 0) {
-      const resp = `❌ Nenhuma notícia encontrada sobre "${topico}".`;
-      return isInteraction ? (context.deferred ? context.editReply(resp) : context.reply(resp)) : context.channel.send(resp);
-    }
+    console.log(chalk.blue(`[GNews] Buscando notícias sobre: ${topico}`));
+    const start = Date.now();
+    const res = await fetch(
+        `https://gnews.io/api/v4/search?q=${topico}&lang=pt&max=5&token=${process.env.GNEWS_KEY}`
+    );
+    console.log(chalk.gray(`[GNews] Resposta da API recebida em ${Date.now() - start}ms`));
 
     const embedNoticias = new EmbedBuilder()
       .setTitle(`📰 Notícias: ${topico.toUpperCase()}`)
@@ -79,59 +79,63 @@ async function processarNoticias(context, topico) {
 
 module.exports = {
   async execute(context) {
-    const isInteraction = context.isChatInputCommand?.();
-    const isSelect = context.isStringSelectMenu?.();
-    
-    let topico = "";
+    try {
+      const isInteraction = context.isChatInputCommand?.();
+      const isSelect = context.isStringSelectMenu?.();
+      
+      let topico = "";
 
-    if (isInteraction) {
-      await context.deferReply();
-      topico = context.options.getString('topico');
-      if (topico) {
-          // Usamos editReply pois já demos deferReply
-          await context.editReply(`🔎 Buscando notícias sobre **${topico}**...`);
-          return processarNoticias(context, topico);
-      }
-    } else if (isSelect) {
-      topico = context.values[0];
-      await context.update({ content: `✅ Selecionado: **${topico}**. Analisando...`, components: [] });
-      return processarNoticias(context, topico);
-    } else {
-      const args = context.content.split(" ");
-      topico = args[1];
-      if (topico) {
-        context.reply(`🔎 Buscando notícias sobre **${topico}**...`);
+      if (isInteraction) {
+        await context.deferReply();
+        topico = context.options.getString('topico');
+        if (topico) {
+            console.log(chalk.cyan(`[Comando] Iniciando busca para tópico: ${topico}`));
+            await context.editReply(`🔎 Buscando notícias sobre **${topico}**...`);
+            return processarNoticias(context, topico);
+        }
+      } else if (isSelect) {
+        topico = context.values[0];
+        console.log(chalk.cyan(`[Menu] Tópico selecionado: ${topico}`));
+        await context.update({ content: `✅ Selecionado: **${topico}**. Analisando...`, components: [] });
         return processarNoticias(context, topico);
+      } else {
+        const args = context.content.split(" ");
+        topico = args[1];
+        if (topico) {
+          context.reply(`🔎 Buscando notícias sobre **${topico}**...`);
+          return processarNoticias(context, topico);
+        }
       }
-    }
 
-    const select = new StringSelectMenuBuilder()
-      .setCustomId('select_topico')
-      .setPlaceholder('Escolha um tópico de notícias...')
-      .addOptions(
-        { label: 'Tecnologia', description: 'Novidades do mundo tech', value: 'tecnologia' },
-        { label: 'Negócios', description: 'Economia e mercado financeiro', value: 'negocios' },
-        { label: 'Entretenimento', description: 'Filmes, séries e celebridades', value: 'entretenimento' },
-        { label: 'Esportes', description: 'Futebol, basquete e outros', value: 'esportes' },
-        { label: 'Ciência', description: 'Descobertas e astronomia', value: 'ciencia' },
-        { label: 'Saúde', description: 'Medicina e bem-estar', value: 'saude' },
-      );
+      const select = new StringSelectMenuBuilder()
+        .setCustomId('select_topico')
+        .setPlaceholder('Escolha um tópico de notícias...')
+        .addOptions(
+          { label: 'Tecnologia', description: 'Novidades do mundo tech', value: 'tecnologia' },
+          { label: 'Negócios', description: 'Economia e mercado financeiro', value: 'negocios' },
+          { label: 'Entretenimento', description: 'Filmes, séries e celebridades', value: 'entretenimento' },
+          { label: 'Esportes', description: 'Futebol, basquete e outros', value: 'esportes' },
+          { label: 'Ciência', description: 'Descobertas e astronomia', value: 'ciencia' },
+          { label: 'Saúde', description: 'Medicina e bem-estar', value: 'saude' },
+        );
 
-    const row = new ActionRowBuilder().addComponents(select);
+      const row = new ActionRowBuilder().addComponents(select);
 
-    if (isInteraction) {
-        // Já demos deferReply lá em cima, então usamos editReply
-        await context.editReply({ content: '🧐 Qual assunto você gostaria de ler hoje?', components: [row] });
-    } else {
-        const response = await context.reply({ content: '🧐 Qual assunto você gostaria de ler hoje?', components: [row] });
-        const collector = response.createMessageComponentCollector({ componentType: ComponentType.StringSelect, time: 30_000 });
-        collector.on('collect', async (i) => {
-            if (i.user.id !== context.author.id) return i.reply({ content: "Você não pode usar este menu!", ephemeral: true });
-            const choice = i.values[0];
-            await i.update({ content: `✅ Selecionado: **${choice}**. Buscando...`, components: [] });
-            await processarNoticias(context, choice);
-        });
-        collector.on('end', c => { if (c.size === 0) response.edit({ content: '⏰ Tempo esgotado.', components: [] }); });
+      if (isInteraction) {
+          await context.editReply({ content: '🧐 Qual assunto você gostaria de ler hoje?', components: [row] });
+      } else {
+          const response = await context.reply({ content: '🧐 Qual assunto você gostaria de ler hoje?', components: [row] });
+          const collector = response.createMessageComponentCollector({ componentType: ComponentType.StringSelect, time: 30_000 });
+          collector.on('collect', async (i) => {
+              if (i.user.id !== context.author.id) return i.reply({ content: "Você não pode usar este menu!", ephemeral: true });
+              const choice = i.values[0];
+              await i.update({ content: `✅ Selecionado: **${choice}**. Buscando...`, components: [] });
+              await processarNoticias(context, choice);
+          });
+          collector.on('end', c => { if (c.size === 0) response.edit({ content: '⏰ Tempo esgotado.', components: [] }); });
+      }
+    } catch (err) {
+      console.error(chalk.red("[Execute Error]"), err);
     }
   }
 };
